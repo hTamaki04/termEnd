@@ -145,11 +145,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="File_ReadAndWrite.cpp" />
     <ClCompile Include="gameSetting.cpp" />
     <ClCompile Include="judgeVictory.cpp" />
     <ClCompile Include="PDCursesSample.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="File_ReadAndWrite.h" />
     <ClInclude Include="gameSetting.h" />
     <ClInclude Include="judgeVictory.h" />
   </ItemGroup>

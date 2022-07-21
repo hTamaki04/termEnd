@@ -6,6 +6,7 @@
 #include <time.h>
 #include "judgeVictory.h"
 #include "gameSetting.h"
+#include "file_ReadAndWrite.h"
 
 #define CHARBUFF 124
 
@@ -13,6 +14,7 @@ void locate(unsigned char x, unsigned char y);
 void getGurrentDirectory(char* currentDirectory);
 int judgeOnce(int x, int y);
 void writeFile(int player);
+int readFile(char* value);
 
 typedef struct {	//プレイヤーの場所を示す
 	unsigned short x;
@@ -28,12 +30,24 @@ int main(int argc, char* argv[])
 {
 	changeConsoleSize(140, 35);	//コンソールサイズを変更する。
 	char num[12];	//数字を文字に変換する際に用いる変数。
+	int timeLimit;
 
 	//iniファイル読み込み
 	char currentDirectory[CHARBUFF];		//取得した現在のディレクトリ名を格納
 	getGurrentDirectory(currentDirectory);	//現在のディレクトリを取得
+	char section[CHARBUFF];
+	sprintf_s(section, "section1");
+	char keyWord[CHARBUFF];
+	sprintf_s(keyWord, "time");
 	char settingFile[CHARBUFF];	//取得した初期化ファイルの絶対パスを格納
 	sprintf_s(settingFile, "%s\\setting.ini", currentDirectory);	//現在のディレクトリ+ファイル名で，初期化ファイルの絶対パスを作成
+	char keyValue[CHARBUFF];
+	if (GetPrivateProfileString(section, keyWord, "none", keyValue, CHARBUFF, settingFile) != 0) {
+		timeLimit = readFile(keyValue);
+	}
+	else {
+		fprintf(stdout, "%s doesn't contain [$s] %s\n", settingFile, section, keyWord);
+	}
 
 	time_t start_time, end_time; //プレイヤーのターンの始まり時間と終わり時間
 
@@ -102,7 +116,7 @@ int main(int argc, char* argv[])
 
 		attrset(COLOR_PAIR(1));	//白文字に設定
 		//iniファイルで設定した時間を経過すると敗北する
-		if ((end_time - start_time) > GetPrivateProfileInt("section1", "time", -1, settingFile)) {
+		if ((end_time - start_time) > timeLimit) {
 			if (playerNum % 2 == 0) {	//プレイヤー1
 				writeFile(2);	//勝利結果をファイルに書き込む
 				endSetting(2);	//試合終了
@@ -117,7 +131,7 @@ int main(int argc, char* argv[])
 		}
 		else {
 			//残り時間を文字に変更
-			snprintf(num, 12, "%d", GetPrivateProfileInt("section1", "time", -1, settingFile) - (end_time - start_time));
+			snprintf(num, 12, "%d", timeLimit - (end_time - start_time));
 			mvaddstr(5, 90, "残り時間：");
 			mvaddstr(5, 100, "   "); //時間部分を消す
 			mvaddstr(5, 100, num);	 //残り時間表示
@@ -177,20 +191,5 @@ void getGurrentDirectory(char* currentDirectory) {
 void locate(unsigned char x, unsigned char y) {		//位置の指定
 	p.x = x * 4;
 	p.y = y * 2;
-}
-
-void writeFile(int player) {
-	FILE* fp;
-	errno_t error;
-
-	int playerNum = player;
-
-	error = fopen_s(&fp, "victoryPlayer.txt", "w");	//ファイルを指定する。
-	if (error != 0)
-		fprintf_s(stderr, "failed to open");
-	else {
-		fprintf(fp, "勝者はPlayer%d", playerNum);	//勝利したプレイヤーをファイルに書き込む。
-		fclose(fp);
-	}
 }
 

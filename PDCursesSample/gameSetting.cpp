@@ -69,6 +69,7 @@ void endSetting(int player) {
 	while (1) {
 		attrset(COLOR_PAIR(1));			// 色１をデフォルト色とする
 		mvprintw(10, 90, "Player %d WIN!!", player);
+		mvprintw(12, 90, "rボタンでリトライ");
 		key = getch();
 		if (key == 'r') {
 			fieldSetting();	//フィールドを設定する。
